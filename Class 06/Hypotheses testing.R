@@ -86,7 +86,7 @@ t.test(income$Income, mu=4500, alternative = "less")
 #H0T: mu=4500
 #H1: mu>4500
 #one-sided, right-tailed
-z_test3 <- (sm-4500)/(sd_inc/sqrt(n))
+z_test3 <- (sm-4500)/((sd_inc/sqrt(n))))
 
 #critical value - upper
 c_upper <- qnorm(1-alpha)
