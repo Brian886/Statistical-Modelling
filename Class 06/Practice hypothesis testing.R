@@ -93,3 +93,36 @@ c(lower, upper)
 #hence the mean annual household income is 4.5 million
 #this statement is not appropriate to test
 Hmisc::smean.cl.normal(HH$Income)
+
+
+#Task 3: right sided case 
+#The average income is at most <=  4.5 million Huf 
+
+#H0: The average income is at 4.5 million
+#H1: The average income is more than 4.5 million 
+
+#Test statisitc. hmmmm more like testing the z_score
+n <- nrow(HH)
+HHmean <- mean(HH$Income)
+HHsigma <- sd(HH$Income)
+
+mu0 <- 4500
+z_test <- (HHmean - mu0)/(HHsigma/sqrt(n))
+
+#find critical value and pvalue
+alpha <- 0.05
+c_r <- qnorm(1-alpha)
+
+c(c_r, z_test)
+#we can see that the z_score for test value is is greater than the critical value.
+
+#find p value
+p_value <- 1-pnorm(z_test)
+pnorm(z_test, lower.tail = FALSE)
+
+#p value is small
+
+#We can conclude that we will reject the null hypothesis and that the average income is significantly more than 4.5 million HUF
+#we also know that by rejecting H0 it will only cause small% error which is small. So I can be save to reject it. 
+
+t.test(HH$Income, mu=4500, alternative = "greater")
