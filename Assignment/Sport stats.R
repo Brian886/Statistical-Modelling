@@ -1,5 +1,6 @@
 setwd("C:/Stats/Assignment")
 
+install.packages("readxl")
 library(readxl)
 
 data <- read_excel("stats_sport.xlsx")
@@ -123,13 +124,37 @@ ps_mse_a <- (within_sd^2/n)*(1-n/N)
 
 c(iid_mse_a, sr_mse_a, ps_mse_a)
 
+##########################################################################################################
+#6) Calculate the empirical mean squared error for each of the three sampling methods, 
+#defined as the variance of the sample means around the population mean.
 
+iid_mse_b <- mean((Samples_iid$iid_mean - mu)^2)
+sr_mse_b <- mean((Samples_sr$sr_mean - mu)^2)
+ps_mse_b <- mean((Samples_pr$pr_mean - mu)^2)
 
+c(iid_mse_b, sr_mse_b, ps_mse_b)
 
+########################################################################################################
+#7) Calculate the empirical mean squared errors using bias and empirical standard error.
+#MSE = Bs^2 + Se^2
 
+classic_var<-function(x){
+  return (mean((x-mean(x))^2))
+}
 
+bs_iid_mean <- mean(Samples_iid$iid_mean) - mu
+bs_sr_mean <- mean(Samples_sr$sr_mean) - mu
+bs_ps_mean <- mean(Samples_pr$pr_mean) - mu
 
+se_iid_mean <- sqrt(classic_var(Samples_iid$iid_mean))
+se_sr_mean <- sqrt(classic_var(Samples_sr$sr_mean))
+se_ps_mean <- sqrt(classic_var(Samples_pr$pr_mean))
 
+iid_mse_c <- bs_iid_mean^2 + se_iid_mean^2
+sr_mse_c <- bs_sr_mean^2 + se_sr_mean^2
+ps_mse_c <- bs_ps_mean^2 + se_ps_mean^2
+
+c(iid_mse_c, sr_mse_c, ps_mse_c)
 
 
 
