@@ -1,4 +1,4 @@
-setwd("C:/Stats/Class 11")
+setwd("C:/Stats/Class 10")
 library(readxl)
 covid <- read.csv("COVID_Deaths_Hungary.csv")
 str(covid)
@@ -121,3 +121,48 @@ simple_model$coefficients
 summary(multvariatemodel)
 # 0.096 means that the β of Nurses is 0.04 in the sample, 
 #but if we ran the regression on new districts outside the observed sample, this value could fluctuate around 0.04 with an expected variability of ±0.096
+
+###################################################################################
+#4)Predictor Importance Order based on t-tests
+##################################################################################
+setwd("C:/Stats/Class 10")
+library(readxl)
+data <- read_excel("BP_Flat.xlsx")
+str(data)
+
+#Now let’s look at a model to estimate apartment prices,
+#where all variables from the BP_Flats data frame are included as explanatory variables except for District:
+bigmodel <- lm(Price ~ .-District, data=data)
+summary(bigmodel)
+#The explanatory power of the model is 81.77%
+#explanatory variable in the model collectively explains 82% of the variation in apartment prices in the sample
+
+#After filtering out the effects of other variables, the direct effect of num of room on the price is still significant
+#p vlaue is 0.048 if alpha = 5, if alpha= 1, then we can reject
+# half-rooms and the number of floors are not significant explanatory variables outside the samples
+
+#order by p-value
+## save the coefficients table from the summary results to a separate object
+Betatable <- summary(bigmodel)$coefficients
+Betatable
+# order the table according to the 4th column (p-values)
+Betatable[order(Betatable[,4]), ]
+
+##########################################
+#5)Relationship of Confidence Intervals and t-tests
+##########################################
+confint(bigmodel)
+confint(bigmodel, level=0.99)
+
+Betatable
+
+alpha <- 0.02
+p <- nrow(Betatable) #num of betas including intercept
+conf_multiplier <- qt(1-alpha/2, df = nrow(data)-1)
+
+Betatable[2,1] - conf_multiplier * Betatable[2,2]
+Betatable[2,1] + conf_multiplier * Betatable[2,2]
+
+#---------------------------------------------------------------------------------------------
+#6) Standard Regression Model assumptions
+#---------------------------------------------------------------------------------------------
