@@ -235,3 +235,63 @@ white(model1, interactions=F)
 # GLS is an alternative estimation to OLS that uses the squared prediction errors of the original OLS estimation as
 # weights in a second round of OLS estimations. Resulting in new coefficient estimates and producing a new model
 # where the error term is now homoskedastic due to the weighting with the original squared errors.
+
+#######################################################################################
+#employee.xlsx
+######################################################################################
+library(readxl)
+data <- read_excel("employee.xlsx")
+str(data)
+data$Settlement <- as.factor(data$Settlement)
+data$Settlement <-  relevel(data$Settlement, ref = "Village")
+
+model1 <- lm(CurrentSalary ~ StartSalary + Settlement + StartSalary:Settlement , data=data)
+
+#1)  What is the marginal effect of StartSalary for an employee working in Budapest?
+#Interpret the result!
+summary(model1)
+1.7769 + -0.5107*1
+#If there were 2 employees coming from Budapest, but one had a 1 thousand dollars higher start salary, his 
+#current salary is expected to be 1.2662 thousand dollars higher. 
+# If an employee's initial salary was higher by 1000 USD, they can expect a current salary higher by 1266 USD
+# if they work in Budapest
+
+#2)  Use the appropriate version of the Breusch–Pagan test (with or without Koenker 
+#correction) to test for heteroskedasticity in the residuals at the α = 5% level. Write down 
+#the null hypothesis (H₀) and alternative hypothesis (H₁), the p-value, and your decision 
+#for all the tests performed in this task.
+
+#check if the residuals is normally distributed
+#H0: No correction needed. The residuals are normally distibuted
+#H1: Correction is needed. The residuals are not normally distributed
+residuals <- model1$residuals
+mean_residuals <- mean(residuals)
+sd_residuals <- sd(residuals)
+norm_quintiles <- qnorm(c(0, 0.2, 0.4, 0.6,0.8,1), mean=mean_residuals, sd=sd_residuals)
+observed_freq <- table(cut(residuals, breaks=norm_quintiles))
+ch2result <- chisq.test(observed_freq)
+pvalue <- ch2result$p.value
+pvalue
+
+
+#H0: residuals are homoskedastic
+#H1: residuals are heteroskedastic
+library(lmtest)
+bptest(model1, studentize = TRUE)
+#reject H0. The residuals are heteroskedastic
+
+#3) If heteroskedasticity is detected, address it using White’s robust standard errors. If no 
+#heteroskedasticity is detected, continue using the original model.
+
+library(car)
+coeftest(model1)
+coeftest(model1, vcov=hccm(model1))
+data$sq_erros <- model1$residuals^2
+table_white_test <- data[,2:4]
+table_white_test$sq_errors <- data$sq_erros
+helper_reg_gls <- lm(log(sq_errors) ~ ., data = table_white_test)
+elements_of_omega <- exp(fitted(helper_reg_gls))
+model1_gls <- lm(CurrentSalary ~ StartSalary + Settlement + StartSalary:Settlement , data=data, weights = 1/elements_of_omega)
+
+#4)What alternative methods can be used to handle heteroskedasticity? How do the results 
+#differ from those obtained using White’s method?
